@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Recipe Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #218838;
+    }
+    .recipe {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .recipe h3 {
+      margin: 0 0 10px;
+    }
+    .recipe pre {
+      white-space: pre-wrap;
+      font-family: Arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AI Recipe Generator</h1>
+    <input type="text" id="ingredients" placeholder="Enter ingredients (e.g., chicken, rice, tomatoes)">
+    <button onclick="generateRecipe()">Generate Recipe</button>
+
+    <div id="recipes"></div>
+  </div>
+
+  <script>
+    async function generateRecipe() {
+      const ingredients = document.getElementById('ingredients').value;
+      if (!ingredients) {
+        alert('Please enter some ingredients!');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://127.0.0.1:5000/generate-recipe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ingredients }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch recipe');
+        }
+
+        const data = await response.json();
+        const recipesDiv = document.getElementById('recipes');
+        recipesDiv.innerHTML = '';
+
+        if (data.recipe) {
+          const recipeDiv = document.createElement('div');
+          recipeDiv.className = 'recipe';
+          recipeDiv.innerHTML = `
+            <h3>Generated Recipe</h3>
+            <pre>${data.recipe}</pre>
+          `;
+          recipesDiv.appendChild(recipeDiv);
+        } else {
+          recipesDiv.innerHTML = '<p>No recipes found. Try different ingredients!</p>';
+        }
+      } catch (error) {
+        console.error(error);
+        alert('An error occurred. Please try again.');
+      }
+    }
+  </script>
+</body>
+</html>
